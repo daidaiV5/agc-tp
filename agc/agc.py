@@ -169,12 +169,13 @@ def get_identity(alignment_list):
 
 
 def get_unique_kmer(kmer_dict, sequence, id_seq, kmer_size):
-    '''Takes a list of aligned sequences in the format ["seq1","seq2"]
+    '''Takes a dictionary of kmer
 	
     
     Return
     ------
-        The percentage of identity between the two
+        Updates the dictionary by adding the index of the 
+	occurance of the different kmer
     '''
     #print(sequence)
     for kmer in cut_kmer(sequence, kmer_size):
@@ -264,16 +265,19 @@ def detect_chimera(perc_identity_matrix):
 
 
 def search_mates(kmer_dict, sequence, kmer_size):
-    """"
-    le fonction permet de trouver des séqences parentes
-    Parameters:
-        kmer_dict : dictionnaire de kmer 
-        chunk : sequences splitted in 4
-        kmer_size : taille de kmer
-    Return:
-        retourne un liste qui contien seq id et count pour 2 sequences parentes, il présente le plus de kmer
-        
     """
+    le fonction est utilisé pour création des OTU
+    Parameters:
+        amplicon_file: fasta.gz
+        minseqlen:longueurr minimale des séquences
+        mincount:minimum comptage
+        chunk_size:taille du chunk
+        kmer_size:taille de kmer
+        ------
+    Return:
+        une liste d'OTU;
+        
+ """
     list_kmer = []
     for kmer in cut_kmer(sequence, kmer_size):
         list_kmer.append(kmer)
@@ -297,9 +301,7 @@ def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, 
     Return:
         une liste d'OTU;
         
- """
-
-
+     """
     list_otu=[]
     list_occ = [seq for seq in dereplication_fulllength(amplicon_file, minseqlen, mincount)]
     list_otu.append([list_occ[0][0], list_occ[0][1]])
@@ -322,7 +324,7 @@ def fill(text, width=80):
     return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
 
 def write_OTU(OTU_list, output_file):
-     """
+    """
     le fonction est utilisé pour l'ecriture des OTU
     Parameters:
         OTU_list : Liste d'OTU
@@ -330,7 +332,7 @@ def write_OTU(OTU_list, output_file):
         ------
     Return:
         un fichier qui sorti la liste des OTU
- """
+     """
     with open(output_file, "w") as f:
         count = 1
         for i, (seq, occ) in enumerate(OTU_list):
@@ -343,15 +345,10 @@ def write_OTU(OTU_list, output_file):
 # Main program
 #==============================================================
 def main():
-    """
-    Main program function
-    """
-    # Get arguments
     args = get_arguments()
-    # notre programme ici
     chimerafree = abundance_greedy_clustering(args.amplicon_file, args.minseqlen, args.mincount, args.chunk_size, args.kmer_size)
-    write_OTU(chimerafree, args.output_file)
     print (chimerafree)
+    write_OTU(chimerafree, args.output_file)
 
 if __name__ == '__main__':
-    main()
+	main()
